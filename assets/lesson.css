@@ -1,0 +1,257 @@
+/* Shared lesson stylesheet — Tufte-inspired, print-friendly */
+
+:root {
+  --bg: #faf8f5;
+  --ink: #1a1a1a;
+  --muted: #5c5c5c;
+  --rule: #d4cfc6;
+  --accent: #0b6e4f;
+  --accent-soft: #e6f3ee;
+  --warn: #8a4b08;
+  --warn-soft: #fff4e5;
+  --wrong: #8b1e1e;
+  --wrong-soft: #fce8e8;
+  --code-bg: #f0ebe3;
+  --max: 42rem;
+  --font-body: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 18px;
+  line-height: 1.55;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--bg);
+  font-family: var(--font-body);
+}
+
+.page {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+header.lesson-header {
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 0.5rem;
+}
+
+h1 {
+  font-size: 1.85rem;
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0 0 0.75rem;
+  letter-spacing: -0.01em;
+}
+
+.lede {
+  font-size: 1.05rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 2.25rem 0 0.75rem;
+}
+
+h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 1.5rem 0 0.5rem;
+}
+
+p,
+li {
+  margin: 0 0 0.9rem;
+}
+
+ul,
+ol {
+  padding-left: 1.25rem;
+}
+
+a {
+  color: var(--accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+code,
+kbd {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--code-bg);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+}
+
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  margin: 0 0 1.25rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+.callout {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  padding: 0.85rem 1rem;
+  margin: 1.25rem 0;
+  border-radius: 0 6px 6px 0;
+}
+
+.callout.warn {
+  border-left-color: var(--warn);
+  background: var(--warn-soft);
+}
+
+.callout p:last-child {
+  margin-bottom: 0;
+}
+
+.cite {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.cite a {
+  color: inherit;
+}
+
+footer.lesson-footer {
+  margin-top: 3rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+nav.crumbs {
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+nav.crumbs a {
+  color: var(--muted);
+}
+
+/* Quiz widget */
+
+.quiz {
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 1.1rem 1.2rem;
+  margin: 1.5rem 0;
+  background: #fff;
+}
+
+.quiz-prompt {
+  font-weight: 600;
+  margin: 0 0 0.85rem;
+}
+
+.quiz-options {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.quiz-options button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  font-size: 0.95rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.quiz-options button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.quiz-options button:disabled {
+  cursor: default;
+}
+
+.quiz-options button.correct {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.quiz-options button.incorrect {
+  background: var(--wrong-soft);
+  border-color: var(--wrong);
+}
+
+.quiz-feedback {
+  margin: 0.85rem 0 0;
+  font-size: 0.95rem;
+  min-height: 1.4em;
+}
+
+.quiz-feedback[data-state="ok"] {
+  color: var(--accent);
+}
+
+.quiz-feedback[data-state="bad"] {
+  color: var(--wrong);
+}
+
+@media print {
+  body {
+    background: white;
+  }
+
+  .quiz-options button {
+    border-color: #999;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: underline;
+  }
+}

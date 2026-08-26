@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lesson 0001 — Async is lazy</title>
+    <link rel="stylesheet" href="../assets/lesson.css" />
+  </head>
+  <body>
+    <article class="page">
+      <nav class="crumbs">
+        <a href="../MISSION.md">Mission</a>
+        ·
+        <a href="../RESOURCES.md">Resources</a>
+      </nav>
+
+      <header class="lesson-header">
+        <p class="eyebrow">Lesson 0001 · Async Rust</p>
+        <h1>Async is lazy</h1>
+        <p class="lede">
+          One idea that unlocks Tokio: calling an <code>async fn</code> builds a
+          future — it does <strong>not</strong> run the body until you
+          <code>.await</code> it.
+        </p>
+      </header>
+
+      <h2>Why this matters for your mission</h2>
+      <p>
+        Interviewers and code reviews both poke this exact point. If you treat
+        <code>async fn</code> like a normal function call, you will write code
+        that “silently does nothing,” misread stack traces, and struggle with
+        the mini-Redis tutorial. Nail laziness first; TCP comes next.
+      </p>
+
+      <h2>The picture</h2>
+      <p>
+        In synchronous Rust, <code>do_work()</code> runs the body immediately.
+        In async Rust, <code>do_work()</code> returns a value that
+        <em>represents</em> the work — a <strong>future</strong>. The body runs
+        only when something drives that future, usually by
+        <code>.await</code>ing it on a <strong>runtime</strong> (Tokio).
+      </p>
+      <p class="cite">
+        Primary source:
+        <a href="https://tokio.rs/tokio/tutorial/hello-tokio"
+          >Tokio tutorial — Hello Tokio</a
+        >
+        (“Using async/await”).
+      </p>
+
+      <h2>See it in this repo</h2>
+      <p>
+        Open <code>src/main.rs</code>. The important shape (from the Tokio
+        tutorial) is:
+      </p>
+      <pre><code>async fn say_world() {
+    println!("world");
+}
+
+#[tokio::main]
+async fn main() {
+    let op = say_world(); // body has NOT run yet
+    println!("hello");
+    op.await;             // NOW "world" prints
+}</code></pre>
+      <p>Expected output order:</p>
+      <pre><code>hello
+world</code></pre>
+      <div class="callout">
+        <p>
+          <strong>Try it:</strong> from the repo root, run
+          <code>cargo run</code>. Confirm <code>hello</code> prints before
+          <code>world</code>. Then delete the <code>.await</code> line, run
+          again, and notice <code>world</code> never appears — Rust may even
+          warn that the future is unused.
+        </p>
+      </div>
+
+      <h2>What <code>#[tokio::main]</code> is doing</h2>
+      <p>
+        An <code>async fn main</code> cannot start by itself. Tokio’s
+        <code>#[tokio::main]</code> macro turns it into a normal
+        <code>fn main</code> that creates a <strong>runtime</strong> and
+        <code>block_on</code>s your async main. The runtime is the engine that
+        polls futures when they are ready to make progress.
+      </p>
+      <p class="cite">
+        Same page:
+        <a href="https://tokio.rs/tokio/tutorial/hello-tokio"
+          >Hello Tokio — Async main function</a
+        >.
+      </p>
+
+      <h2>Check yourself</h2>
+      <div
+        class="quiz"
+        data-correct="1"
+        data-ok="Yes — calling builds a future; .await runs it."
+        data-bad="Re-read ‘The picture’: calling alone does not run the body."
+      >
+        <p class="quiz-prompt">
+          You write <code>let f = fetch_user();</code> where
+          <code>fetch_user</code> is <code>async fn</code>. What has happened?
+        </p>
+        <ul class="quiz-options">
+          <li>
+            <button type="button">
+              The function body already ran to completion
+            </button>
+          </li>
+          <li>
+            <button type="button">
+              A future was created; the body has not run
+            </button>
+          </li>
+        </ul>
+        <p class="quiz-feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-correct="0"
+        data-ok="Exactly — .await drives the future on the runtime."
+        data-bad="Without .await (or another driver), the future stays idle."
+      >
+        <p class="quiz-prompt">
+          What makes the body of that <code>async fn</code> actually execute?
+        </p>
+        <ul class="quiz-options">
+          <li>
+            <button type="button">
+              Awaiting the future (for example with .await)
+            </button>
+          </li>
+          <li>
+            <button type="button">
+              Declaring the function with the async keyword
+            </button>
+          </li>
+        </ul>
+        <p class="quiz-feedback" aria-live="polite"></p>
+      </div>
+
+      <h2>Primary reading (10–15 min)</h2>
+      <p>
+        Read
+        <a href="https://tokio.rs/tokio/tutorial/hello-tokio"
+          >Hello Tokio</a
+        >
+        through the sections <em>Using async/await</em> and
+        <em>Async main function</em>. Skim the mini-Redis client example — we
+        will run that path in a later lesson after this mental model sticks.
+      </p>
+      <p class="cite">
+        Optional vocabulary:
+        <a href="https://doc.rust-lang.org/book/ch17-01-futures-and-syntax.html"
+          >Rust Book §17.1 — Futures and the Async Syntax</a
+        >.
+      </p>
+
+      <h2>Done when</h2>
+      <ul>
+        <li>
+          You can say, without looking: “calling async builds a future; await
+          runs it.”
+        </li>
+        <li>
+          <code>cargo run</code> shows <code>hello</code> then
+          <code>world</code>, and removing <code>.await</code> drops
+          <code>world</code>.
+        </li>
+        <li>Both quizzes above feel obvious, not lucky.</li>
+      </ul>
+
+      <div class="callout warn">
+        <p>
+          Stuck or fuzzy? Ask me follow-up questions in this chat — I’m your
+          teacher for this workspace. Vague confusion counts; say what you
+          tried.
+        </p>
+      </div>
+
+      <footer class="lesson-footer">
+        Next up (when you’re ready): set up mini-Redis and make your first
+        real <code>.await</code> over TCP — still one skill at a time.
+      </footer>
+    </article>
+    <script src="../assets/quiz.js"></script>
+  </body>
+</html>
