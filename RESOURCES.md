@@ -5,7 +5,13 @@
 - [Tutorial: Tokio — Setup & Mini-Redis overview](https://tokio.rs/tokio/tutorial/setup)
   Official path we are following. Use for: project shape, installing `mini-redis-server`, what is in/out of scope for the learning server.
 - [Tutorial: Tokio — Hello Tokio](https://tokio.rs/tokio/tutorial/hello-tokio)
-  First runnable Tokio app and the lazy-`async` mental model. Use for: `#[tokio::main]`, `.await`, why calling an `async fn` does nothing by itself.
+  First runnable Tokio app and the lazy-`async` mental model. Use for: `#[tokio::main]`, `.await`, why calling an `async fn` does nothing by itself, and why TCP connect is an await point.
+- [Spec: RFC 9293 — Transmission Control Protocol](https://www.rfc-editor.org/rfc/rfc9293.html)
+  IETF TCP specification. Use for: TCP is a reliable in-order byte stream; connection-oriented; three-way handshake.
+- [Glossary: MDN — TCP](https://developer.mozilla.org/en-US/docs/Glossary/TCP)
+  Short definition of TCP (reliable ordered delivery). Use for: beginner wording.
+- [Glossary: MDN — TCP handshake](https://developer.mozilla.org/en-US/docs/Glossary/TCP_handshake)
+  SYN → SYN-ACK → ACK. Use for: what `connect().await` is waiting for.
 - [Book: The Rust Programming Language — Ch. 17 Async](https://doc.rust-lang.org/book/ch17-00-async-await.html)
   Official language book chapter on futures, `async`/`await`, concurrency vs parallelism. Use for: vocabulary and concepts without Tokio-specific APIs.
 - [Book: Asynchronous Programming in Rust (async-book)](https://rust-lang.github.io/async-book/index.html)

@@ -1,19 +1,21 @@
-//! Lesson 0001 demo: async is lazy.
-//! Calling `say_world()` builds a future; the body runs only at `.await`.
-//! See `lessons/0001-async-is-lazy.html`.
+//! Lesson 0002: first `.await` over TCP (Tokio Hello Tokio client).
+//! Requires `mini-redis-server` running in another terminal.
+//! See `lessons/0002-first-await-over-tcp.html`.
 
-async fn say_world() {
-    println!("world");
-}
+use mini_redis::{client, Result};
 
 #[tokio::main]
-async fn main() {
-    // Calling `say_world()` does not execute the body yet.
-    let op = say_world();
+async fn main() -> Result<()> {
+    // Open a connection to the mini-redis address.
+    let mut client = client::connect("127.0.0.1:6379").await?;
 
-    // This prints first.
-    println!("hello");
+    // Set the key "hello" with value "world".
+    client.set("hello", "world".into()).await?;
 
-    // `.await` drives the future — now "world" prints.
-    op.await;
+    // Get key "hello".
+    let result = client.get("hello").await?;
+
+    println!("got value from the server; result={:?}", result);
+
+    Ok(())
 }

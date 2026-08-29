@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reference — Future</title>
+    <link rel="stylesheet" href="../assets/lesson.css" />
+    <link rel="stylesheet" href="../assets/sim.css" />
+  </head>
+  <body>
+    <article class="page">
+      <nav class="crumbs">
+        <a href="../MISSION.md">Mission</a>
+        ·
+        <a href="../lessons/0001-async-is-lazy.html">Lesson 0001</a>
+        ·
+        <a href="../lessons/0003-what-is-tcp.html">Lesson 0003</a>
+      </nav>
+
+      <header class="lesson-header">
+        <p class="eyebrow">Reference · Async Rust</p>
+        <h1>Future</h1>
+        <p class="lede">
+          A value that <em>represents</em> async work. Built by calling an
+          <code>async fn</code>; driven by <code>.await</code> on a runtime.
+        </p>
+      </header>
+
+      <h2>Picture</h2>
+      <div class="compare">
+        <div class="compare-card">
+          <h3>Sync call</h3>
+          <p>Cook now.</p>
+          <p class="flow">call → body runs → done</p>
+        </div>
+        <div class="compare-card">
+          <h3>Async call</h3>
+          <p>Hand you a recipe (Future).</p>
+          <p class="flow">call → Future → .await → body runs</p>
+        </div>
+      </div>
+
+      <figure class="sim" data-sim="future">
+        <div class="sim-stage">
+          <div class="future-sim-code">
+            <div class="line" data-line="call">let op = say_world();</div>
+            <div class="line" data-line="hello">println!("hello");</div>
+            <div class="line" data-line="await">op.await;</div>
+          </div>
+          <div class="future-sim-viz">
+            <div class="recipe is-idle" data-role="recipe">
+              <p class="recipe-title">
+                Future
+                <span class="sim-badge" data-role="badge" data-tone="idle"
+                  >not built</span
+                >
+              </p>
+              <p class="recipe-body" data-role="recipe-body"></p>
+            </div>
+            <div class="sim-console" data-role="console"></div>
+          </div>
+        </div>
+        <figcaption class="sim-caption" data-role="caption"></figcaption>
+        <div class="sim-controls">
+          <button type="button" data-role="play">Play</button>
+          <button type="button" data-role="reset">Reset</button>
+          <label>
+            <input type="checkbox" data-role="await" checked />
+            with .await
+          </label>
+        </div>
+      </figure>
+
+      <h2>One line</h2>
+      <div class="callout">
+        <p>
+          Calling builds a Future; <code>.await</code> runs it. No
+          <code>.await</code> → body never runs.
+        </p>
+      </div>
+
+      <h2>With Tokio</h2>
+      <ul class="steps">
+        <li>
+          <span class="n">1</span>
+          <div class="step-body">
+            <strong><code>let op = say_world();</code></strong>
+            <p>Future created. Idle.</p>
+          </div>
+        </li>
+        <li>
+          <span class="n">2</span>
+          <div class="step-body">
+            <strong><code>op.await;</code></strong>
+            <p>Runtime drives the Future. Body runs.</p>
+          </div>
+        </li>
+      </ul>
+
+      <h2>Do not confuse</h2>
+      <ul>
+        <li>
+          A Future is <em>not</em> a thread. It is a value the runtime polls.
+        </li>
+        <li>
+          A Future is not TCP. TCP is the pipe; the Future is “wait for this
+          step on the pipe.”
+        </li>
+        <li>
+          Deep <code>poll</code> / <code>Pin</code> details wait until the
+          tutorial needs them (see mission out-of-scope).
+        </li>
+      </ul>
+
+      <footer class="lesson-footer">
+        Sources summarised in
+        <a href="../lessons/0001-async-is-lazy.html">Lesson 0001</a>
+        · TCP pipe:
+        <a href="./tcp.html">TCP</a>.
+      </footer>
+    </article>
+    <script src="../assets/sim.js"></script>
+  </body>
+</html>

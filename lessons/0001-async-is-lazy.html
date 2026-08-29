@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Lesson 0001 — Async is lazy</title>
     <link rel="stylesheet" href="../assets/lesson.css" />
+    <link rel="stylesheet" href="../assets/sim.css" />
   </head>
   <body>
     <article class="page">
@@ -12,6 +13,8 @@
         <a href="../MISSION.md">Mission</a>
         ·
         <a href="../RESOURCES.md">Resources</a>
+        ·
+        <a href="../reference/future.html">Reference: Future</a>
       </nav>
 
       <header class="lesson-header">
@@ -19,76 +22,181 @@
         <h1>Async is lazy</h1>
         <p class="lede">
           One idea that unlocks Tokio: calling an <code>async fn</code> builds a
-          future — it does <strong>not</strong> run the body until you
-          <code>.await</code> it.
+          <strong>Future</strong> — it does <strong>not</strong> run the body
+          until you <code>.await</code> it.
         </p>
       </header>
 
       <h2>Why this matters for your mission</h2>
       <p>
-        Interviewers and code reviews both poke this exact point. If you treat
-        <code>async fn</code> like a normal function call, you will write code
-        that “silently does nothing,” misread stack traces, and struggle with
-        the mini-Redis tutorial. Nail laziness first; TCP comes next.
+        Interviewers and code reviews poke this exact point. Treat
+        <code>async fn</code> like a normal call and you write code that
+        “silently does nothing.” Nail this before mini-Redis TCP.
       </p>
 
       <h2>The picture</h2>
+      <div class="compare">
+        <div class="compare-card">
+          <h3>Normal fn</h3>
+          <p>Call = cook now. Body runs before the next line.</p>
+          <p class="flow">call → runs → done</p>
+        </div>
+        <div class="compare-card">
+          <h3>async fn → Future</h3>
+          <p>Call = recipe card. Cooking starts at <code>.await</code>.</p>
+          <p class="flow">call → Future → await → runs</p>
+        </div>
+      </div>
       <p>
-        In synchronous Rust, <code>do_work()</code> runs the body immediately.
-        In async Rust, <code>do_work()</code> returns a value that
-        <em>represents</em> the work — a <strong>future</strong>. The body runs
-        only when something drives that future, usually by
-        <code>.await</code>ing it on a <strong>runtime</strong> (Tokio).
+        A <strong>Future</strong> is a value that
+        <em>represents</em> work that is not done yet. Something must
+        <em>drive</em> it — usually <code>.await</code> on Tokio’s
+        <strong>runtime</strong>.
       </p>
-      <p class="cite">
-        Primary source:
-        <a href="https://tokio.rs/tokio/tutorial/hello-tokio"
-          >Tokio tutorial — Hello Tokio</a
-        >
-        (“Using async/await”).
-      </p>
+      <figure class="sim" data-sim="future">
+        <div class="sim-stage">
+          <div class="future-sim-code">
+            <div class="line" data-line="call">let op = say_world();</div>
+            <div class="line" data-line="hello">println!("hello");</div>
+            <div class="line" data-line="await">op.await;</div>
+          </div>
+          <div class="future-sim-viz">
+            <div class="recipe is-idle" data-role="recipe">
+              <p class="recipe-title">
+                Future
+                <span class="sim-badge" data-role="badge" data-tone="idle"
+                  >not built</span
+                >
+              </p>
+              <p class="recipe-body" data-role="recipe-body"></p>
+            </div>
+            <div class="sim-console" data-role="console"></div>
+          </div>
+        </div>
+        <figcaption class="sim-caption" data-role="caption"></figcaption>
+        <div class="sim-controls">
+          <button type="button" data-role="play">Play</button>
+          <button type="button" data-role="reset">Reset</button>
+          <label>
+            <input type="checkbox" data-role="await" checked />
+            with .await
+          </label>
+        </div>
+      </figure>
 
-      <h2>See it in this repo</h2>
+      <h2>Step through the demo</h2>
       <p>
-        Open <code>src/main.rs</code>. The important shape (from the Tokio
-        tutorial) is:
+        Same shape as <code>src/main.rs</code> (from Tokio’s Hello Tokio):
       </p>
+      <ul class="steps">
+        <li>
+          <span class="n">1</span>
+          <div class="step-body">
+            <strong><code>let op = say_world();</code></strong>
+            <p>
+              Future built. Body has <em>not</em> run. Console: (nothing)
+            </p>
+          </div>
+        </li>
+        <li>
+          <span class="n">2</span>
+          <div class="step-body">
+            <strong><code>println!("hello");</code></strong>
+            <p>Sync code runs now. Console: <code>hello</code></p>
+          </div>
+        </li>
+        <li>
+          <span class="n">3</span>
+          <div class="step-body">
+            <strong><code>op.await;</code></strong>
+            <p>
+              Runtime drives the Future. Body runs. Console adds
+              <code>world</code>
+            </p>
+          </div>
+        </li>
+      </ul>
       <pre><code>async fn say_world() {
     println!("world");
 }
 
 #[tokio::main]
 async fn main() {
-    let op = say_world(); // body has NOT run yet
+    let op = say_world(); // Future only
     println!("hello");
-    op.await;             // NOW "world" prints
+    op.await;             // NOW body runs
 }</code></pre>
-      <p>Expected output order:</p>
-      <pre><code>hello
-world</code></pre>
       <div class="callout">
         <p>
-          <strong>Try it:</strong> from the repo root, run
-          <code>cargo run</code>. Confirm <code>hello</code> prints before
-          <code>world</code>. Then delete the <code>.await</code> line, run
-          again, and notice <code>world</code> never appears — Rust may even
-          warn that the future is unused.
+          <strong>Try it:</strong> uncomment <code>op.await;</code> in
+          <code>src/main.rs</code> if needed, then <code>cargo run</code>. You
+          should see <code>hello</code> then <code>world</code>. Comment
+          <code>.await</code> out again — <code>world</code> vanishes (Rust may
+          warn the Future is unused).
         </p>
       </div>
 
       <h2>What <code>#[tokio::main]</code> is doing</h2>
       <p>
-        An <code>async fn main</code> cannot start by itself. Tokio’s
-        <code>#[tokio::main]</code> macro turns it into a normal
-        <code>fn main</code> that creates a <strong>runtime</strong> and
-        <code>block_on</code>s your async main. The runtime is the engine that
-        polls futures when they are ready to make progress.
+        An <code>async fn main</code> cannot start alone. The macro turns it
+        into a normal <code>fn main</code> that starts a <strong>runtime</strong>
+        and <code>block_on</code>s your async main. The runtime is the engine
+        that drives Futures.
       </p>
+
+      <h2>Sources — summarised for you</h2>
+      <p>
+        You do not need to read the long pages. Here is what they say that
+        matters for this lesson:
+      </p>
+      <ul class="summary-list">
+        <li>
+          <strong
+            ><a href="https://tokio.rs/tokio/tutorial/hello-tokio"
+              >Tokio — Hello Tokio</a
+            >
+            (primary)</strong
+          >
+          <span
+            >Calling <code>async fn</code> does not run the body; it returns a
+            Future. <code>.await</code> starts execution. Rust async is
+            <em>lazy</em> — different from many other languages.
+            <code>#[tokio::main]</code> builds a runtime and
+            <code>block_on</code>s your async main.</span
+          >
+        </li>
+        <li>
+          <strong
+            ><a
+              href="https://doc.rust-lang.org/book/ch17-01-futures-and-syntax.html"
+              >Rust Book §17.1</a
+            ></strong
+          >
+          <span
+            >A Future is a value that may not be ready now. <code>async</code>
+            /
+            <code>await</code> compile into Future types (like
+            <code>for</code> compiles into Iterator). You usually
+            <code>.await</code>; you rarely touch <code>poll</code> yourself.</span
+          >
+        </li>
+        <li>
+          <strong
+            ><a
+              href="https://doc.rust-lang.org/stable/std/future/trait.Future.html"
+              >std::future::Future</a
+            ></strong
+          >
+          <span
+            >Futures are inert until polled. Skip the trait details for now —
+            mission keeps deep <code>Pin</code>/<code>poll</code> out of scope
+            until the tutorial needs them.</span
+          >
+        </li>
+      </ul>
       <p class="cite">
-        Same page:
-        <a href="https://tokio.rs/tokio/tutorial/hello-tokio"
-          >Hello Tokio — Async main function</a
-        >.
+        Quick card:
+        <a href="../reference/future.html">reference/future.html</a>
       </p>
 
       <h2>Check yourself</h2>
@@ -141,27 +249,10 @@ world</code></pre>
         <p class="quiz-feedback" aria-live="polite"></p>
       </div>
 
-      <h2>Primary reading (10–15 min)</h2>
-      <p>
-        Read
-        <a href="https://tokio.rs/tokio/tutorial/hello-tokio"
-          >Hello Tokio</a
-        >
-        through the sections <em>Using async/await</em> and
-        <em>Async main function</em>. Skim the mini-Redis client example — we
-        will run that path in a later lesson after this mental model sticks.
-      </p>
-      <p class="cite">
-        Optional vocabulary:
-        <a href="https://doc.rust-lang.org/book/ch17-01-futures-and-syntax.html"
-          >Rust Book §17.1 — Futures and the Async Syntax</a
-        >.
-      </p>
-
       <h2>Done when</h2>
       <ul>
         <li>
-          You can say, without looking: “calling async builds a future; await
+          You can say, without looking: “calling async builds a Future; await
           runs it.”
         </li>
         <li>
@@ -181,10 +272,13 @@ world</code></pre>
       </div>
 
       <footer class="lesson-footer">
-        Next up (when you’re ready): set up mini-Redis and make your first
-        real <code>.await</code> over TCP — still one skill at a time.
+        Next:
+        <a href="./0002-first-await-over-tcp.html"
+          >0002 First await over TCP</a
+        >.
       </footer>
     </article>
     <script src="../assets/quiz.js"></script>
+    <script src="../assets/sim.js"></script>
   </body>
 </html>

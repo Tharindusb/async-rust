@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lesson 0003 — What is TCP</title>
+    <link rel="stylesheet" href="../assets/lesson.css" />
+    <link rel="stylesheet" href="../assets/sim.css" />
+  </head>
+  <body>
+    <article class="page">
+      <nav class="crumbs">
+        <a href="../MISSION.md">Mission</a>
+        ·
+        <a href="../RESOURCES.md">Resources</a>
+        ·
+        <a href="./0002-first-await-over-tcp.html">Lesson 0002</a>
+        ·
+        <a href="../reference/tcp.html">Reference: TCP</a>
+        ·
+        <a href="../reference/future.html">Reference: Future</a>
+      </nav>
+
+      <header class="lesson-header">
+        <p class="eyebrow">Lesson 0003 · Async Rust</p>
+        <h1>What is TCP?</h1>
+        <p class="lede">
+          The pipe under <code>connect().await</code>: a private phone line.
+          Handshake first, then bytes in order — that wait is a
+          <strong>Future</strong>.
+        </p>
+      </header>
+
+      <h2>Why this matters for your mission</h2>
+      <p>
+        You already ran the mini-Redis client. Interviewers will ask what
+        <code>connect().await</code> is waiting <em>for</em>. Answer: a TCP
+        connection — not “magic async.” You also saw
+        <code>Connection refused</code> when the server was down. That was TCP
+        saying: nobody picked up.
+      </p>
+
+      <h2>Analogy: a private phone line</h2>
+      <p>
+        A postcard can vanish or arrive out of order. TCP is a
+        <em>phone call</em>: you both agree you are on the line, then you talk
+        in sequence. Missed words get repeated. That is “reliable, in-order
+        byte stream.”
+      </p>
+      <p class="cite">
+        IETF:
+        <a href="https://www.rfc-editor.org/rfc/rfc9293.html">RFC 9293</a>
+        §2.2.
+      </p>
+
+      <h2>Play: Future (the recipe)</h2>
+      <p>
+        Same idea as
+        <a href="./0001-async-is-lazy.html">lesson 0001</a>. Uncheck
+        <code>.await</code> to see the unused Future.
+      </p>
+
+      <figure class="sim" data-sim="future">
+        <div class="sim-stage">
+          <div class="future-sim-code">
+            <div class="line" data-line="call">let op = say_world();</div>
+            <div class="line" data-line="hello">println!("hello");</div>
+            <div class="line" data-line="await">op.await;</div>
+          </div>
+          <div class="future-sim-viz">
+            <div class="recipe is-idle" data-role="recipe">
+              <p class="recipe-title">
+                Future
+                <span class="sim-badge" data-role="badge" data-tone="idle"
+                  >not built</span
+                >
+              </p>
+              <p class="recipe-body" data-role="recipe-body"></p>
+            </div>
+            <div class="sim-console" data-role="console"></div>
+          </div>
+        </div>
+        <figcaption class="sim-caption" data-role="caption"></figcaption>
+        <div class="sim-controls">
+          <button type="button" data-role="play">Play</button>
+          <button type="button" data-role="reset">Reset</button>
+          <label>
+            <input type="checkbox" data-role="await" checked />
+            with .await
+          </label>
+        </div>
+      </figure>
+
+      <h2>Play: TCP (the phone line)</h2>
+      <p>
+        Three knocks = handshake (SYN, SYN-ACK, ACK). Then SET/GET ride the
+        open pipe. Uncheck “server running” to replay Connection refused.
+      </p>
+
+      <figure class="sim" data-sim="tcp">
+        <div class="sim-stage">
+          <div class="tcp-meta">
+            <span
+              >connect Future:
+              <span class="sim-badge" data-role="badge" data-tone="idle"
+                >no Future yet</span
+              ></span
+            >
+          </div>
+          <div class="tcp-scene">
+            <div class="tcp-host" data-role="client">
+              <strong>client</strong>
+              <span>cargo run</span>
+            </div>
+            <div class="tcp-pipe" data-role="pipe">
+              <div class="tcp-rail"></div>
+              <div class="tcp-packet" data-role="packet">SYN</div>
+            </div>
+            <div class="tcp-host" data-role="server">
+              <strong>server</strong>
+              <span>:6379</span>
+            </div>
+          </div>
+          <p class="tcp-log" data-role="log"></p>
+        </div>
+        <figcaption class="sim-caption" data-role="caption"></figcaption>
+        <div class="sim-controls">
+          <button type="button" data-role="play">Play</button>
+          <button type="button" data-role="reset">Reset</button>
+          <label>
+            <input type="checkbox" data-role="server-on" checked />
+            server running
+          </label>
+        </div>
+      </figure>
+
+      <h2>Tie it to your code</h2>
+      <pre><code>client::connect("127.0.0.1:6379").await?;</code></pre>
+      <p>
+        <code>connect</code> builds a Future. <code>.await</code> drives it
+        until the handshake succeeds (Ready) or fails (refused).
+        <code>set</code> / <code>get</code> are more Futures on that same
+        pipe.
+      </p>
+
+      <h2>Sources — summarised for you</h2>
+      <ul class="summary-list">
+        <li>
+          <strong
+            ><a href="https://www.rfc-editor.org/rfc/rfc9293.html"
+              >RFC 9293 (TCP spec)</a
+            ></strong
+          >
+          <span
+            >TCP = reliable, in-order byte stream over IP segments. Connection
+            oriented. Handshake is three messages because both sides must
+            share and confirm starting sequence numbers.</span
+          >
+        </li>
+        <li>
+          <strong
+            ><a href="https://developer.mozilla.org/en-US/docs/Glossary/TCP"
+              >MDN — TCP</a
+            >
+            /
+            <a
+              href="https://developer.mozilla.org/en-US/docs/Glossary/TCP_handshake"
+              >handshake</a
+            ></strong
+          >
+          <span
+            >Two hosts exchange a stream. Delivery is guaranteed and ordered.
+            Setup: SYN → SYN-ACK → ACK. Then data (your SET/GET) can flow.</span
+          >
+        </li>
+        <li>
+          <strong
+            ><a href="https://tokio.rs/tokio/tutorial/hello-tokio"
+              >Tokio — Hello Tokio</a
+            ></strong
+          >
+          <span
+            >TCP connect can take time; async suspends the task instead of
+            blocking the thread. The code still looks like a normal call plus
+            <code>.await</code>.</span
+          >
+        </li>
+      </ul>
+      <p class="cite">
+        Cards:
+        <a href="../reference/tcp.html">TCP</a>
+        ·
+        <a href="../reference/future.html">Future</a>
+      </p>
+
+      <h2>Check yourself</h2>
+      <div
+        class="quiz"
+        data-correct="0"
+        data-ok="Yes — TCP is the ordered, reliable pipe."
+        data-bad="Postcards can drop or shuffle; TCP resends and keeps order."
+      >
+        <p class="quiz-prompt">What kind of service is TCP?</p>
+        <ul class="quiz-options">
+          <li>
+            <button type="button">Reliable, ordered byte stream</button>
+          </li>
+          <li>
+            <button type="button">Unordered, best-effort packets</button>
+          </li>
+        </ul>
+        <p class="quiz-feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-correct="0"
+        data-ok="connect.await waits for the handshake, not for SET."
+        data-bad="SET is a later Future on the already-open pipe."
+      >
+        <p class="quiz-prompt">
+          What is <code>connect().await</code> waiting for?
+        </p>
+        <ul class="quiz-options">
+          <li>
+            <button type="button">The handshake completing successfully</button>
+          </li>
+          <li>
+            <button type="button">The SET call completing successfully</button>
+          </li>
+        </ul>
+        <p class="quiz-feedback" aria-live="polite"></p>
+      </div>
+
+      <h2>Done when</h2>
+      <ul>
+        <li>
+          You can play both animations and narrate them without reading the
+          captions.
+        </li>
+        <li>
+          You can explain Connection refused as “SYN, nobody home.”
+        </li>
+        <li>Both quizzes feel obvious.</li>
+      </ul>
+
+      <div class="callout warn">
+        <p>
+          Fuzzy on a frame of the animation? Ask here — I’m your teacher for
+          this workspace.
+        </p>
+      </div>
+
+      <footer class="lesson-footer">
+        Prev:
+        <a href="./0002-first-await-over-tcp.html">0002 First await over TCP</a>
+        · Next (when ready): Tokio spawning — still one skill at a time.
+      </footer>
+    </article>
+    <script src="../assets/quiz.js"></script>
+    <script src="../assets/sim.js"></script>
+  </body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reference — Hello Tokio client</title>
+    <link rel="stylesheet" href="../assets/lesson.css" />
+  </head>
+  <body>
+    <article class="page">
+      <nav class="crumbs">
+        <a href="../MISSION.md">Mission</a>
+        ·
+        <a href="../lessons/0002-first-await-over-tcp.html">Lesson 0002</a>
+      </nav>
+
+      <header class="lesson-header">
+        <p class="eyebrow">Reference · Async Rust</p>
+        <h1>Hello Tokio client</h1>
+        <p class="lede">
+          Two terminals: server listening, client awaiting connect / set / get.
+        </p>
+      </header>
+
+      <h2>Commands</h2>
+      <pre><code>cargo install mini-redis
+mini-redis-server          # terminal A
+cargo run                  # terminal B (this crate)</code></pre>
+
+      <h2>Shape</h2>
+      <p class="flow" style="font-family: var(--font-mono); color: var(--accent)">
+        connect.await → set.await → get.await → print
+      </p>
+      <pre><code>let mut client = client::connect("127.0.0.1:6379").await?;
+client.set("hello", "world".into()).await?;
+let result = client.get("hello").await?;</code></pre>
+
+      <h2>One line</h2>
+      <div class="callout">
+        <p>
+          Each async call builds a Future; each <code>.await</code> waits for
+          that network step. Server must be up first.
+        </p>
+      </div>
+
+      <footer class="lesson-footer">
+        From
+        <a href="https://tokio.rs/tokio/tutorial/hello-tokio">Hello Tokio</a>
+        ·
+        <a href="https://tokio.rs/tokio/tutorial/setup">Setup</a>.
+      </footer>
+    </article>
+  </body>
+</html>

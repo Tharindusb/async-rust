@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lesson 0002 — First await over TCP</title>
+    <link rel="stylesheet" href="../assets/lesson.css" />
+  </head>
+  <body>
+    <article class="page">
+      <nav class="crumbs">
+        <a href="../MISSION.md">Mission</a>
+        ·
+        <a href="../RESOURCES.md">Resources</a>
+        ·
+        <a href="./0001-async-is-lazy.html">Lesson 0001</a>
+        ·
+        <a href="../reference/hello-tokio-client.html">Reference: client</a>
+      </nav>
+
+      <header class="lesson-header">
+        <p class="eyebrow">Lesson 0002 · Async Rust</p>
+        <h1>First <code>.await</code> over TCP</h1>
+        <p class="lede">
+          Run a mini-Redis server, then use Tokio to
+          <code>connect</code> → <code>set</code> → <code>get</code> — each
+          step waits with <code>.await</code>.
+        </p>
+      </header>
+
+      <h2>Why this matters for your mission</h2>
+      <p>
+        Mini-Redis is the official Tokio teaching project. Your first real
+        network Future is the same skill you will grow into a GET/SET server
+        later. Interview talking point: “I waited on TCP with
+        <code>.await</code> on Tokio.”
+      </p>
+
+      <h2>The picture</h2>
+      <div class="compare">
+        <div class="compare-card">
+          <h3>Terminal A — server</h3>
+          <p>Keeps listening. Accepts your client’s TCP.</p>
+          <p class="flow">mini-redis-server</p>
+        </div>
+        <div class="compare-card">
+          <h3>Terminal B — you</h3>
+          <p>Each <code>.await</code> pauses until that step finishes.</p>
+          <p class="flow">connect → set → get → print</p>
+        </div>
+      </div>
+      <p>
+        Reminder from
+        <a href="./0001-async-is-lazy.html">lesson 0001</a>: without
+        <code>.await</code>, those calls would only build Futures and do
+        nothing.
+      </p>
+
+      <h2>Do this</h2>
+      <ul class="steps">
+        <li>
+          <span class="n">1</span>
+          <div class="step-body">
+            <strong>Install the teaching server</strong>
+            <p>
+              Once: <code>cargo install mini-redis</code> (puts
+              <code>mini-redis-server</code> on your PATH).
+            </p>
+          </div>
+        </li>
+        <li>
+          <span class="n">2</span>
+          <div class="step-body">
+            <strong>Start the server</strong>
+            <p>
+              New terminal: <code>mini-redis-server</code>. Leave it running.
+              Optional check:
+              <code>mini-redis-cli get foo</code> → <code>(nil)</code>.
+            </p>
+          </div>
+        </li>
+        <li>
+          <span class="n">3</span>
+          <div class="step-body">
+            <strong>Run this crate’s client</strong>
+            <p>
+              In the repo: <code>cargo run</code>. Code is already in
+              <code>src/main.rs</code> (from Tokio Hello Tokio).
+            </p>
+          </div>
+        </li>
+      </ul>
+
+      <div class="callout">
+        <p>
+          <strong>Win:</strong> you should see
+          <code>got value from the server; result=Some(b"world")</code>.
+          If connect fails, the server is probably not running.
+        </p>
+      </div>
+
+      <h2>What the code is doing</h2>
+      <pre><code>use mini_redis::{client, Result};
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    let mut client = client::connect("127.0.0.1:6379").await?;
+    client.set("hello", "world".into()).await?;
+    let result = client.get("hello").await?;
+    println!("got value from the server; result={:?}", result);
+    Ok(())
+}</code></pre>
+      <ul>
+        <li>
+          <code>connect(...).await?</code> — TCP Future; <code>?</code> means
+          “if it failed, return the error from <code>main</code>.”
+        </li>
+        <li>
+          <code>set</code> / <code>get</code> — more Futures over that
+          connection; each needs its own <code>.await</code>.
+        </li>
+        <li>
+          We use the <code>mini-redis</code> <em>client crate</em> now so we
+          can practice awaiting before we build the server ourselves.
+        </li>
+      </ul>
+
+      <h2>Sources — summarised for you</h2>
+      <ul class="summary-list">
+        <li>
+          <strong
+            ><a href="https://tokio.rs/tokio/tutorial/setup"
+              >Tokio — Setup</a
+            ></strong
+          >
+          <span
+            >Install <code>mini-redis</code> with Cargo; run
+            <code>mini-redis-server</code>; sanity-check with
+            <code>mini-redis-cli get foo</code>. Mini-Redis is for learning
+            Tokio, not production Redis.</span
+          >
+        </li>
+        <li>
+          <strong
+            ><a href="https://tokio.rs/tokio/tutorial/hello-tokio"
+              >Tokio — Hello Tokio</a
+            >
+            (primary)</strong
+          >
+          <span
+            >First app: connect, set, get — each with <code>.await</code>.
+            Async looks sync; the thread is not blocked while waiting. Lazy
+            Futures still apply.</span
+          >
+        </li>
+      </ul>
+
+      <h2>Check yourself</h2>
+      <div
+        class="quiz"
+        data-correct="1"
+        data-ok="Right — without the server, TCP connect has nowhere to go."
+        data-bad="The client talks to a live server process on 6379."
+      >
+        <p class="quiz-prompt">
+          <code>cargo run</code> fails to connect. What is the usual fix?
+        </p>
+        <ul class="quiz-options">
+          <li>
+            <button type="button">
+              Delete await then run cargo again
+            </button>
+          </li>
+          <li>
+            <button type="button">
+              Start server then run cargo again
+            </button>
+          </li>
+        </ul>
+        <p class="quiz-feedback" aria-live="polite"></p>
+      </div>
+
+      <div
+        class="quiz"
+        data-correct="0"
+        data-ok="Yes — each async step is its own Future that must be awaited."
+        data-bad="set and get also return Futures; they need .await too."
+      >
+        <p class="quiz-prompt">
+          After <code>connect(...).await</code>, why does
+          <code>set</code> still need <code>.await</code>?
+        </p>
+        <ul class="quiz-options">
+          <li>
+            <button type="button">
+              Each set call builds a Future too
+            </button>
+          </li>
+          <li>
+            <button type="button">
+              The set call already ran at connect
+            </button>
+          </li>
+        </ul>
+        <p class="quiz-feedback" aria-live="polite"></p>
+      </div>
+
+      <h2>Done when</h2>
+      <ul>
+        <li>
+          <code>mini-redis-server</code> is running and
+          <code>cargo run</code> prints
+          <code>Some(b"world")</code>.
+        </li>
+        <li>Both quizzes feel obvious.</li>
+        <li>
+          You can point at each <code>.await</code> and say what it is waiting
+          for.
+        </li>
+      </ul>
+
+      <div class="callout warn">
+        <p>
+          Stuck? Paste the error here — I’m your teacher for this workspace.
+          Vague confusion counts.
+        </p>
+      </div>
+
+      <footer class="lesson-footer">
+        Prev:
+        <a href="./0001-async-is-lazy.html">0001 Async is lazy</a>
+        · Next:
+        <a href="./0003-what-is-tcp.html">0003 What is TCP</a>
+      </footer>
+    </article>
+    <script src="../assets/quiz.js"></script>
+  </body>
+</html>

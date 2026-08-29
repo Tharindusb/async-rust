@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reference — TCP</title>
+    <link rel="stylesheet" href="../assets/lesson.css" />
+    <link rel="stylesheet" href="../assets/sim.css" />
+  </head>
+  <body>
+    <article class="page">
+      <nav class="crumbs">
+        <a href="../MISSION.md">Mission</a>
+        ·
+        <a href="../lessons/0003-what-is-tcp.html">Lesson 0003</a>
+      </nav>
+
+      <header class="lesson-header">
+        <p class="eyebrow">Reference · Async Rust</p>
+        <h1>TCP</h1>
+        <p class="lede">
+          Private phone line between two programs. Handshake, then a reliable
+          ordered byte stream. <code>connect().await</code> waits for this.
+        </p>
+      </header>
+
+      <h2>Picture</h2>
+      <p class="flow" style="font-family: var(--font-mono); color: var(--accent)">
+        SYN → SYN-ACK → ACK → ESTABLISHED → SET / GET bytes
+      </p>
+
+      <figure class="sim" data-sim="tcp">
+        <div class="sim-stage">
+          <div class="tcp-meta">
+            <span
+              >connect Future:
+              <span class="sim-badge" data-role="badge" data-tone="idle"
+                >no Future yet</span
+              ></span
+            >
+          </div>
+          <div class="tcp-scene">
+            <div class="tcp-host" data-role="client">
+              <strong>client</strong>
+              <span>cargo run</span>
+            </div>
+            <div class="tcp-pipe" data-role="pipe">
+              <div class="tcp-rail"></div>
+              <div class="tcp-packet" data-role="packet">SYN</div>
+            </div>
+            <div class="tcp-host" data-role="server">
+              <strong>server</strong>
+              <span>:6379</span>
+            </div>
+          </div>
+          <p class="tcp-log" data-role="log"></p>
+        </div>
+        <figcaption class="sim-caption" data-role="caption"></figcaption>
+        <div class="sim-controls">
+          <button type="button" data-role="play">Play</button>
+          <button type="button" data-role="reset">Reset</button>
+          <label>
+            <input type="checkbox" data-role="server-on" checked />
+            server running
+          </label>
+        </div>
+      </figure>
+
+      <h2>One line</h2>
+      <div class="callout">
+        <p>
+          TCP is not a thread and not a Future. The Future is “wait until this
+          TCP step finishes.”
+        </p>
+      </div>
+
+      <h2>Do not confuse</h2>
+      <ul>
+        <li>
+          IP carries packets; TCP turns them into an ordered stream.
+        </li>
+        <li>
+          Deep congestion control / sequence-number math waits until a later
+          lesson needs it.
+        </li>
+      </ul>
+
+      <footer class="lesson-footer">
+        RFC 9293 · MDN TCP ·
+        <a href="../lessons/0003-what-is-tcp.html">Lesson 0003</a>
+      </footer>
+    </article>
+    <script src="../assets/sim.js"></script>
+  </body>
+</html>
